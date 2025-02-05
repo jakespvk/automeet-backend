@@ -35,23 +35,29 @@ gmail_password = os.getenv("gmail_password")
 
 SECRET_KEY = secrets.token_urlsafe(32)
 ALGORITHM = "HS256"
-TOKEN_EXPIRE_MINUTES = 1
+TOKEN_EXPIRE_MINUTES = 60
 
 
 class EmailRequest(BaseModel):
     email: EmailStr
 
 
-class User(BaseModel):
+class UserDbAuthDetails(BaseModel):
     email: EmailStr
+    api_url: str
+    api_key: str
+
+
+class User(BaseModel):
+    email: EmailStr = ""
     subscription: bool = False
     db_type: str = ""
     columns: List = []
     column_limit: int = 0
     row_limit: int = 0
-    login_token: str
-    api_url: str
-    api_key: str
+    login_token: str = ""
+    api_url: str = ""
+    api_key: str = ""
 
     def __init__(
         self,
@@ -78,11 +84,11 @@ class User(BaseModel):
         )
 
 
-def update_user_db_details(user: User):
+def update_user_db_details(user: User, api_url: str, api_key: str):
     if user.db_type == "SQLite":
-        pass
+        query = f"UPDATE users SET api_url = '{api_url}', api_key = '{api_key}' WHERE email = '{user.email}'"
     elif user.db_type == "ActiveCampaign":
-        query = f"UPDATE users WHERE email = '{user.email}' SET api_url = '{user.api_url}', api_key = '{user.api_key}'"
+        query = f"UPDATE users SET api_url = '{api_url}', api_key = '{api_key}' WHERE email = '{user.email}'"
     db = sqlite3.connect("user.db")
     cursor = db.cursor()
     cursor.execute(query)
@@ -117,18 +123,17 @@ def get_user(user_email):
         (user_email,),
     )
     user = cursor.fetchone()
-    print(user)
     db.close()
     return User(
         user_email,
-        user[1],
-        user[2],
-        user[3],
-        user[4],
-        user[5],
-        user[6],
-        user[7],
-        user[8],
+        user[1] or False,
+        user[2] or "",
+        user[3] or [],
+        user[4] or 0,
+        user[5] or 0,
+        user[6] or "",
+        user[7] or "",
+        user[8] or "",
     )
 
 
@@ -204,6 +209,7 @@ def run_scheduler():
 app = FastAPI()
 
 origins = [
+    "*",
     "http://localhost:3000",
     "https://automeet.space",
 ]
@@ -243,7 +249,7 @@ async def verifyLogin(token: str = Query(...)):
 
 
 @app.post("/set-user-db-details")
-async def set_user_db_details(user: User):
-    print(user)
-    update_user_db_details(user)
+async def set_user_db_details(data: UserDbAuthDetails):
+    print(data)
+    update_user_db_details(get_user(data.email), data.api_url, data.api_key)
     return {"message": "User details updated!"}
