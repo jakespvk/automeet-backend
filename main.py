@@ -1,6 +1,7 @@
 import sqlite3
 
-# from typing import Annotated
+from typing import Annotated, List
+
 # from doing_stuff.db_providers.active_campaign_adapter import (
 #     get_activecampaign_connection,
 #     get_activecampaign_data,
@@ -41,32 +42,52 @@ class EmailRequest(BaseModel):
     email: EmailStr
 
 
-class User:
-    email: str
-    subscription: bool
-    db_type: str
-    columns: list
-    column_limit: int
-    row_limit: int
+class User(BaseModel):
+    email: EmailStr
+    subscription: bool = False
+    db_type: str = ""
+    columns: List = []
+    column_limit: int = 0
+    row_limit: int = 0
     login_token: str
+    api_url: str
+    api_key: str
 
     def __init__(
         self,
-        email,
-        subscription,
-        db_type,
-        columns,
-        column_limit,
-        row_limit,
-        login_token,
-    ):
-        self.email = email
-        self.subscription = subscription
-        self.db_type = db_type
-        self.columns = columns
-        self.column_limit = column_limit
-        self.row_limit = row_limit
-        self.login_token = login_token
+        email: EmailStr,
+        subscription: bool,
+        db_type: str,
+        columns: List,
+        column_limit: int,
+        row_limit: int,
+        login_token: str,
+        api_url: str,
+        api_key: str,
+    ) -> None:
+        super().__init__(
+            email=email,
+            subscription=subscription,
+            db_type=db_type,
+            columns=columns,
+            column_limit=column_limit,
+            row_limit=row_limit,
+            login_token=login_token,
+            api_url=api_url,
+            api_key=api_key,
+        )
+
+
+def update_user_db_details(user: User):
+    if user.db_type == "SQLite":
+        pass
+    elif user.db_type == "ActiveCampaign":
+        query = f"UPDATE users WHERE email = '{user.email}' SET api_url = '{user.api_url}', api_key = '{user.api_key}'"
+    db = sqlite3.connect("user.db")
+    cursor = db.cursor()
+    cursor.execute(query)
+    db.commit()
+    db.close()
 
 
 def create_magic_link_token(email: str) -> str:
@@ -98,7 +119,17 @@ def get_user(user_email):
     user = cursor.fetchone()
     print(user)
     db.close()
-    return User(user_email, user[1], user[2], user[3], user[4], user[5], user[6])
+    return User(
+        user_email,
+        user[1],
+        user[2],
+        user[3],
+        user[4],
+        user[5],
+        user[6],
+        user[7],
+        user[8],
+    )
 
 
 def get_user_db_type(user):
@@ -108,6 +139,17 @@ def get_user_db_type(user):
         return "ActiveCampaign"
     else:
         return "None"
+
+
+def set_user_token(user, token):
+    db = sqlite3.connect("user.db")
+    cursor = db.cursor()
+    cursor.execute(
+        "UPDATE users SET login_token = ? WHERE email = ?",
+        (token, user.email),
+    )
+    db.commit()
+    db.close()
 
 
 def main_process(email, columns, column_limit, row_limit):
@@ -178,16 +220,7 @@ app.add_middleware(
 @app.post("/auth/signin/")
 async def sign_in(data: EmailRequest):
     token = create_magic_link_token(data.email)
-    user = get_user(data.email)
-    user.login_token = token
-    db = sqlite3.connect("user.db")
-    cursor = db.cursor()
-    cursor.execute(
-        "UPDATE users SET login_token = ? WHERE email = ?",
-        (token, data.email),
-    )
-    db.commit()
-    db.close()
+    set_user_token(get_user(data.email), token)
     send_magic_link(data.email, token)
     return {"message": "Magic link sent to your email!"}
 
@@ -199,17 +232,18 @@ async def verifyLogin(token: str = Query(...)):
         email = payload.get("sub")
         if email is None:
             raise HTTPException(status_code=401, detail="Invalid token")
-        print(payload)
-        return {"email": f"{email}", "token": token, "message": "Login successful!"}
+        user = get_user(email)
+        if user.login_token == token:
+            print(user)
+            return {"user": user}
+        else:
+            raise HTTPException(status_code=401, detail="Invalid token")
     except JWTError:
         raise HTTPException(status_code=400, detail="Invalid or expired token")
 
 
-@app.get("/dashboard/{email}/{token}")
-async def dashboard(email: str, token: str):
-    user = get_user(email)
-    print(user.db_type)
-    if user.login_token == token:
-        return {"email": user.email, "db_type": get_user_db_type(user)}
-    else:
-        raise HTTPException(status_code=401, detail="Invalid token")
+@app.post("/set-user-db-details")
+async def set_user_db_details(user: User):
+    print(user)
+    update_user_db_details(user)
+    return {"message": "User details updated!"}
