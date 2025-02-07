@@ -2,13 +2,13 @@ import sqlite3
 
 from typing import Annotated, List
 
-# from doing_stuff.db_providers.active_campaign_adapter import (
+# from db_providers.active_campaign_adapter import (
 #     get_activecampaign_connection,
 #     get_activecampaign_data,
 # )
-from doing_stuff.db_providers.sqlite_adapter import get_data
-from doing_stuff.query_gpt import chat_with_gpt
-from doing_stuff.send_result_email import send_email
+from db_providers.sqlite_adapter import get_data
+from query_gpt import chat_with_gpt
+from send_result_email import send_email
 
 import threading
 import schedule
