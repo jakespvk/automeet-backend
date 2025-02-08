@@ -103,7 +103,12 @@ def create_magic_link_token(email: str) -> str:
 
 
 def send_magic_link(email: str, token: str):
-    magic_link = f"http://localhost:3000/magic?token={token}"
+    hostname = os.system("hostname")
+    if "ubuntu" in hostname:
+        base_url = "https://automeet.space"
+    else:
+        base_url = "http://localhost:3000"
+    magic_link = f"{base_url}/magic?token={token}"
     msg = MIMEText(f"Click this link to log in: {magic_link}")
     msg["Subject"] = "Your magic link login"
     msg["From"] = "Automeet"
