@@ -10,9 +10,9 @@ from db_providers.sqlite_adapter import get_data
 from query_gpt import chat_with_gpt
 from send_result_email import send_email
 
+import subprocess
 import threading
 import schedule
-import subprocess
 
 from jose import jwt, JWTError
 import secrets
