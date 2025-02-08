@@ -12,6 +12,7 @@ from send_result_email import send_email
 
 import threading
 import schedule
+import subprocess
 
 from jose import jwt, JWTError
 import secrets
@@ -103,8 +104,8 @@ def create_magic_link_token(email: str) -> str:
 
 
 def send_magic_link(email: str, token: str):
-    hostname = os.system("hostname")
-    if "ubuntu" in hostname:
+    process = subprocess.run("hostname", shell=True, capture_output=True, text=True)
+    if "ubuntu" in process.stdout.strip():
         base_url = "https://automeet.space"
     else:
         base_url = "http://localhost:3000"
