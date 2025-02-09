@@ -43,17 +43,12 @@ class EmailRequest(BaseModel):
     email: EmailStr
 
 
-class UserDbAuthDetails(BaseModel):
-    email: EmailStr
-    api_url: str
-    api_key: str
-
-
 class User(BaseModel):
     email: EmailStr = ""
     subscription: bool = False
     db_type: str = ""
     columns: List = []
+    active_columns: List = []
     column_limit: int = 0
     row_limit: int = 0
     login_token: str = ""
@@ -66,6 +61,7 @@ class User(BaseModel):
         subscription: bool,
         db_type: str,
         columns: List,
+        active_columns: List,
         column_limit: int,
         row_limit: int,
         login_token: str,
@@ -77,6 +73,7 @@ class User(BaseModel):
             subscription=subscription,
             db_type=db_type,
             columns=columns,
+            active_columns=active_columns,
             column_limit=column_limit,
             row_limit=row_limit,
             login_token=login_token,
@@ -85,11 +82,16 @@ class User(BaseModel):
         )
 
 
-def update_user_db_details(user: User, api_url: str, api_key: str):
+class UpdateUser(BaseModel):
+    user: User
+
+
+def update_user_db_details(user: User):
+    active_columns_str = ",".join(user.active_columns)
     if user.db_type == "SQLite":
-        query = f"UPDATE users SET api_url = '{api_url}', api_key = '{api_key}' WHERE email = '{user.email}'"
+        query = f"UPDATE users SET api_url = '{user.api_url}', api_key = '{user.api_key}', active_columns = '{active_columns_str}' WHERE email = '{user.email}'"
     elif user.db_type == "ActiveCampaign":
-        query = f"UPDATE users SET api_url = '{api_url}', api_key = '{api_key}' WHERE email = '{user.email}'"
+        query = f"UPDATE users SET api_url = '{user.api_url}', api_key = '{user.api_key}', active_columns = '{active_columns_str}' WHERE email = '{user.email}'"
     db = sqlite3.connect("user.db")
     cursor = db.cursor()
     cursor.execute(query)
@@ -129,12 +131,15 @@ def get_user(user_email):
         (user_email,),
     )
     user = cursor.fetchone()
+    list_columns = user[3].split(",")
+    list_active_columns = user[9].split(",")
     db.close()
     return User(
-        user_email,
+        user[0],
         user[1] or False,
         user[2] or "",
-        user[3] or [],
+        list_columns or [],
+        list_active_columns or [],
         user[4] or 0,
         user[5] or 0,
         user[6] or "",
@@ -215,7 +220,6 @@ def run_scheduler():
 app = FastAPI()
 
 origins = [
-    "*",
     "http://localhost:3000",
     "https://automeet.space",
 ]
@@ -255,7 +259,12 @@ async def verifyLogin(token: str = Query(...)):
 
 
 @app.post("/set-user-db-details")
-async def set_user_db_details(data: UserDbAuthDetails):
-    print(data)
-    update_user_db_details(get_user(data.email), data.api_url, data.api_key)
-    return {"message": "User details updated!"}
+async def set_user_db_details(data: UpdateUser):
+    print(data.user)
+    update_user_db_details(data.user)
+    return {"message": "User details updated!", "user": get_user(data.user.email)}
+
+
+@app.get("/")
+def home():
+    return {"Hello": "World"}
