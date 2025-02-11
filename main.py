@@ -54,6 +54,7 @@ class User(BaseModel):
     login_token: str = ""
     api_url: str = ""
     api_key: str = ""
+    poll_frequency: str = ""
 
     def __init__(
         self,
@@ -67,6 +68,7 @@ class User(BaseModel):
         login_token: str,
         api_url: str,
         api_key: str,
+        poll_frequency: str,
     ) -> None:
         super().__init__(
             email=email,
@@ -79,6 +81,7 @@ class User(BaseModel):
             login_token=login_token,
             api_url=api_url,
             api_key=api_key,
+            poll_frequency=poll_frequency,
         )
 
 
@@ -89,9 +92,19 @@ class UpdateUser(BaseModel):
 def update_user_db_details(user: User):
     active_columns_str = ",".join(user.active_columns)
     if user.db_type == "SQLite":
-        query = f"UPDATE users SET api_url = '{user.api_url}', api_key = '{user.api_key}', active_columns = '{active_columns_str}' WHERE email = '{user.email}'"
+        query = f"UPDATE users \
+            SET api_url = '{user.api_url}', \
+            api_key = '{user.api_key}', \
+            active_columns = '{active_columns_str}', \
+            poll_frequency = '{user.poll_frequency}' \
+            WHERE email = '{user.email}'"
     elif user.db_type == "ActiveCampaign":
-        query = f"UPDATE users SET api_url = '{user.api_url}', api_key = '{user.api_key}', active_columns = '{active_columns_str}' WHERE email = '{user.email}'"
+        query = f"UPDATE users \
+            SET api_url = '{user.api_url}', \
+            api_key = '{user.api_key}', \
+            active_columns = '{active_columns_str}', \
+            poll_frequency = '{user.poll_frequency}' \
+            WHERE email = '{user.email}'"
     db = sqlite3.connect("user.db")
     cursor = db.cursor()
     cursor.execute(query)
@@ -145,6 +158,7 @@ def get_user(user_email):
         user[6] or "",
         user[7] or "",
         user[8] or "",
+        user[10] or "",
     )
 
 
@@ -217,7 +231,7 @@ def run_scheduler():
 # scheduler_thread = threading.Thread(target=run_scheduler, daemon=True)
 # scheduler_thread.start()
 
-app = FastAPI()
+app = FastAPI(port=443)
 
 origins = [
     "http://localhost:3000",
