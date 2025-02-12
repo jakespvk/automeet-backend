@@ -279,6 +279,6 @@ async def set_user_db_details(data: UpdateUser):
     return {"message": "User details updated!", "user": get_user(data.user.email)}
 
 
-@app.get("/")
+@app.get("/automeet-backend")
 def home():
-    return {"Hello": "World"}
+    return {"message": "Hello from Automeet Backend"}
