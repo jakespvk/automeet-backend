@@ -2,10 +2,10 @@ import sqlite3
 
 from typing import Annotated, List
 
-# from db_providers.active_campaign_adapter import (
-#     get_activecampaign_connection,
-#     get_activecampaign_data,
-# )
+from db_providers.active_campaign_adapter import (
+    get_activecampaign_connection,
+    get_activecampaign_data,
+)
 from db_providers.sqlite_adapter import get_data
 from query_gpt import chat_with_gpt
 from send_result_email import send_email
@@ -183,18 +183,18 @@ def set_user_token(user, token):
 
 
 def main_process(email, columns, column_limit, row_limit):
-    # client = get_activecampaign_connection(email)
-    # input_user_data = get_activecampaign_data(client, columns, column_limit, row_limit)
-    input_user_data = get_data(
-        "/home/jakes/scratch/automeet-backend/doing_stuff/benDB.db",
-        columns,
-        column_limit,
-        row_limit,
-    )
+    client = get_activecampaign_connection(email)
+    input_user_data = get_activecampaign_data(client, columns, column_limit, row_limit)
+    # input_user_data = get_data(
+    #     "/home/jakes/scratch/automeet-backend/doing_stuff/benDB.db",
+    #     columns,
+    #     column_limit,
+    #     row_limit,
+    # )
     print(input_user_data)
-    gpt_output = chat_with_gpt(input_user_data)
-    print(gpt_output)
-    send_email(email, gpt_output)
+    # gpt_output = chat_with_gpt(input_user_data)
+    # print(gpt_output)
+    # send_email(email, gpt_output)
 
 
 def run_main_process():
@@ -219,7 +219,7 @@ def run_main_process():
         main_process(email, columns, column_limit, row_limit)
 
 
-# run_main_process()
+run_main_process()
 
 
 def run_scheduler():
