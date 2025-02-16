@@ -231,7 +231,7 @@ def run_scheduler():
 # scheduler_thread = threading.Thread(target=run_scheduler, daemon=True)
 # scheduler_thread.start()
 
-app = FastAPI(port=443)
+app = FastAPI()
 
 origins = [
     "http://localhost:3000",
@@ -252,6 +252,16 @@ async def sign_in(data: EmailRequest):
     token = create_magic_link_token(data.email)
     set_user_token(get_user(data.email), token)
     send_magic_link(data.email, token)
+    return {"message": "Magic link sent to your email!"}
+
+
+@app.post("/auth/signup/")
+async def sign_up(data: EmailRequest):
+    token = create_magic_link_token(data.email)
+    user = User()
+    user.email = data.email
+    set_user_token(user, token)
+    send_magic_link(user.email, token)
     return {"message": "Magic link sent to your email!"}
 
 
