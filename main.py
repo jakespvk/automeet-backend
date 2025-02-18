@@ -3,8 +3,8 @@ import sqlite3
 from typing import Annotated, List
 
 from db_providers.active_campaign_adapter import (
-    get_activecampaign_connection,
-    get_activecampaign_data,
+    get_fields,
+    get_contacts,
 )
 from db_providers.sqlite_adapter import get_data
 from query_gpt import chat_with_gpt
@@ -43,32 +43,39 @@ class EmailRequest(BaseModel):
     email: EmailStr
 
 
+class SetupSubscription(BaseModel):
+    email: EmailStr
+    db_type: str
+    api_url: str
+    api_key: str
+
+
 class User(BaseModel):
-    email: EmailStr = ""
-    subscription: bool = False
-    db_type: str = ""
-    columns: List = []
-    active_columns: List = []
-    column_limit: int = 0
-    row_limit: int = 0
-    login_token: str = ""
-    api_url: str = ""
-    api_key: str = ""
-    poll_frequency: str = ""
+    email: EmailStr
+    subscription: bool
+    db_type: str
+    columns: List
+    active_columns: List
+    column_limit: int
+    row_limit: int
+    login_token: str
+    api_url: str
+    api_key: str
+    poll_frequency: str
 
     def __init__(
         self,
         email: EmailStr,
-        subscription: bool,
-        db_type: str,
-        columns: List,
-        active_columns: List,
-        column_limit: int,
-        row_limit: int,
-        login_token: str,
-        api_url: str,
-        api_key: str,
-        poll_frequency: str,
+        subscription: bool = False,
+        db_type: str = "",
+        columns: List = [],
+        active_columns: List = [],
+        column_limit: int = 0,
+        row_limit: int = 0,
+        login_token: str = "",
+        api_url: str = "",
+        api_key: str = "",
+        poll_frequency: str = "",
     ) -> None:
         super().__init__(
             email=email,
@@ -89,8 +96,42 @@ class UpdateUser(BaseModel):
     user: User
 
 
+def setup_subscription_helper(email, db_type, api_url, api_key):
+    db = sqlite3.connect("user.db")
+    cursor = db.cursor()
+    cursor.execute(
+        f"UPDATE users SET db_type = '{db_type}', api_url = '{api_url}', api_key = '{api_key}' WHERE email = '{email}'"
+    )
+    db.commit()
+    db.close()
+    user = get_user(email)
+    user.active_columns = ["id", "firstName", "lastName", "email"]
+    update_user_db_details(user)
+    user.columns = get_fields(email)
+    update_user_db_fields(user)
+
+
+def update_user_db_fields(user: User):
+    if user.columns == []:
+        columns_str = ""
+    else:
+        columns_str = ",".join(user.columns)
+    if user.db_type == "ActiveCampaign":
+        query = f"UPDATE users \
+            SET columns = '{columns_str}' \
+            WHERE email = '{user.email}'"
+    db = sqlite3.connect("user.db")
+    cursor = db.cursor()
+    cursor.execute(query)
+    db.commit()
+    db.close()
+
+
 def update_user_db_details(user: User):
-    active_columns_str = ",".join(user.active_columns)
+    if user.active_columns == []:
+        active_columns_str = ""
+    else:
+        active_columns_str = ",".join(user.active_columns)
     if user.db_type == "SQLite":
         query = f"UPDATE users \
             SET api_url = '{user.api_url}', \
@@ -136,7 +177,31 @@ def send_magic_link(email: str, token: str):
         s.send_message(msg)
 
 
-def get_user(user_email):
+def new_user(user: User) -> User:
+    db = sqlite3.connect("user.db")
+    cursor = db.cursor()
+    cursor.execute(
+        "INSERT INTO users (email, subscription, db_type, columns, active_columns, column_limit, row_limit, login_token, api_url, api_key, poll_frequency) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        (
+            user.email,
+            user.subscription,
+            user.db_type,
+            ",".join(user.columns),
+            ",".join(user.active_columns),
+            user.column_limit,
+            user.row_limit,
+            user.login_token,
+            user.api_url,
+            user.api_key,
+            user.poll_frequency,
+        ),
+    )
+    db.commit()
+    db.close()
+    return user
+
+
+def get_user(user_email) -> User:
     db = sqlite3.connect("user.db")
     cursor = db.cursor()
     cursor.execute(
@@ -144,9 +209,17 @@ def get_user(user_email):
         (user_email,),
     )
     user = cursor.fetchone()
-    list_columns = user[3].split(",")
-    list_active_columns = user[9].split(",")
     db.close()
+    if user is None:
+        return new_user(User(user_email))
+    if user[3] == "":
+        list_columns = []
+    else:
+        list_columns = user[3].split(",")
+    if user[9] == "":
+        list_active_columns = []
+    else:
+        list_active_columns = user[9].split(",")
     return User(
         user[0],
         user[1] or False,
@@ -183,15 +256,16 @@ def set_user_token(user, token):
 
 
 def main_process(email, columns, column_limit, row_limit):
-    client = get_activecampaign_connection(email)
-    input_user_data = get_activecampaign_data(client, columns, column_limit, row_limit)
+    pass
+    # client = get_activecampaign_connection(email)
+    # input_user_data = get_activecampaign_data(client, columns, column_limit, row_limit)
     # input_user_data = get_data(
     #     "/home/jakes/scratch/automeet-backend/doing_stuff/benDB.db",
     #     columns,
     #     column_limit,
     #     row_limit,
     # )
-    print(input_user_data)
+    # print(input_user_data)
     # gpt_output = chat_with_gpt(input_user_data)
     # print(gpt_output)
     # send_email(email, gpt_output)
@@ -199,27 +273,28 @@ def main_process(email, columns, column_limit, row_limit):
 
 def run_main_process():
     # for email in emails in db where they have a subscription
-    columns = [
-        "ID",
-        "First Name",
-        "Last Name",
-        "*Mgmt Notes",
-        "*Investment Thesis",
-        "*Industries",
-        "*Interests (Abstract & Ideas)",
-        "*Background",
-        "*What do you hope to gain?",
-        "*Current Focus",
-        "*Application Answer",
-        "*Expertise",
-    ]
+    columns = get_fields("jakespvk@gmail.com")
+    # columns = [
+    #     "ID",
+    #     "First Name",
+    #     "Last Name",
+    #     "*Mgmt Notes",
+    #     "*Investment Thesis",
+    #     "*Industries",
+    #     "*Interests (Abstract & Ideas)",
+    #     "*Background",
+    #     "*What do you hope to gain?",
+    #     "*Current Focus",
+    #     "*Application Answer",
+    #     "*Expertise",
+    # ]
     column_limit = 11
     row_limit = 200
     for email in ["jakespvk@gmail.com"]:
         main_process(email, columns, column_limit, row_limit)
 
 
-run_main_process()
+# run_main_process()
 
 
 def run_scheduler():
@@ -258,8 +333,8 @@ async def sign_in(data: EmailRequest):
 @app.post("/auth/signup/")
 async def sign_up(data: EmailRequest):
     token = create_magic_link_token(data.email)
-    user = User()
-    user.email = data.email
+    user = User(data.email)
+    new_user(user)
     set_user_token(user, token)
     send_magic_link(user.email, token)
     return {"message": "Magic link sent to your email!"}
@@ -274,7 +349,6 @@ async def verifyLogin(token: str = Query(...)):
             raise HTTPException(status_code=401, detail="Invalid token")
         user = get_user(email)
         if user.login_token == token:
-            print(user)
             return {"user": user}
         else:
             raise HTTPException(status_code=401, detail="Invalid token")
@@ -284,11 +358,16 @@ async def verifyLogin(token: str = Query(...)):
 
 @app.post("/set-user-db-details")
 async def set_user_db_details(data: UpdateUser):
-    print(data.user)
     update_user_db_details(data.user)
     return {"message": "User details updated!", "user": get_user(data.user.email)}
 
 
+@app.post("/setup-subscription")
+async def setup_subscription(data: SetupSubscription):
+    setup_subscription_helper(data.email, data.db_type, data.api_url, data.api_key)
+    return {"message": "Subscription setup successful!"}
+
+
 @app.get("/automeetbackend")
-def home():
+async def home():
     return {"message": "Hello from Automeet Backend"}
