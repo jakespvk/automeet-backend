@@ -173,8 +173,8 @@ def test_function():
 
 
 def run_scheduler():
-    # schedule.every().day.at("22:12").do(run_process_function)
-    schedule.every(1).minutes.do(run_process_function)
+    schedule.every().monday.at("06:15").do(run_process_function)
+    # schedule.every(1).minutes.do(run_process_function)
     while True:
         schedule.run_pending()
 
