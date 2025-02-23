@@ -1,18 +1,14 @@
 import sqlite3
+import threading
 
-from typing import Annotated, List
+from main_process import __main__
 
-from db_providers.active_campaign_adapter import (
-    get_fields,
-    get_contacts,
-)
-from db_providers.sqlite_adapter import get_data
-from query_gpt import chat_with_gpt
-from send_result_email import send_email
+from typing import List  # Annotated
+
+from db_providers.active_campaign_adapter import get_fields
+# from db_providers.sqlite_adapter import get_data
 
 import subprocess
-import threading
-import schedule
 
 from jose import jwt, JWTError
 import secrets
@@ -255,58 +251,8 @@ def set_user_token(user, token):
     db.close()
 
 
-def main_process(email, columns, column_limit, row_limit):
-    pass
-    # client = get_activecampaign_connection(email)
-    # input_user_data = get_activecampaign_data(client, columns, column_limit, row_limit)
-    # input_user_data = get_data(
-    #     "/home/jakes/scratch/automeet-backend/doing_stuff/benDB.db",
-    #     columns,
-    #     column_limit,
-    #     row_limit,
-    # )
-    # print(input_user_data)
-    # gpt_output = chat_with_gpt(input_user_data)
-    # print(gpt_output)
-    # send_email(email, gpt_output)
-
-
-def run_main_process():
-    # for email in emails in db where they have a subscription
-    columns = get_fields("jakespvk@gmail.com")
-    # columns = [
-    #     "ID",
-    #     "First Name",
-    #     "Last Name",
-    #     "*Mgmt Notes",
-    #     "*Investment Thesis",
-    #     "*Industries",
-    #     "*Interests (Abstract & Ideas)",
-    #     "*Background",
-    #     "*What do you hope to gain?",
-    #     "*Current Focus",
-    #     "*Application Answer",
-    #     "*Expertise",
-    # ]
-    column_limit = 11
-    row_limit = 200
-    for email in ["jakespvk@gmail.com"]:
-        main_process(email, columns, column_limit, row_limit)
-
-
-# run_main_process()
-
-
-def run_scheduler():
-    schedule.every().day.at("22:12").do(run_main_process)
-    while True:
-        schedule.run_pending()
-
-
-# scheduler_thread = threading.Thread(target=run_scheduler, daemon=True)
-# scheduler_thread.start()
-
 app = FastAPI()
+__main__()
 
 origins = [
     "http://localhost:3000",

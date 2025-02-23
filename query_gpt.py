@@ -13,11 +13,12 @@ def chat_with_gpt(input_prompt):
         with similar backgrounds or interests in their description fields.  \
         Please return the related/similar people in separate groups. \
         Please return *aggressively*, that is, return even if you are unsure \
-        I would rather have lower quality matches to review than less matches \
-        overall--quantity over quality. \n"
+        I would rather have lower quality matches to review than less matches. \
+        Overall--quantity over quality. \n"
     )
     input_prompt = base_prompt + input_prompt
     completion = client.chat.completions.create(
-        model="o3-mini", messages=[{"role": "user", "content": input_prompt}]
+        model="gpt-4o-mini", messages=[{"role": "user", "content": input_prompt}]
     )
+    print(completion.choices[0].message.content)
     return completion.choices[0].message.content

@@ -24,7 +24,7 @@ def get_contacts(email):
     contacts = response.json().get("contacts")
     contacts_parsed = []
     for contact in contacts:
-        custom_fields = get_custom_fields(contact.get("id"), api_url, api_key)
+        custom_fields = get_custom_fields(contact.get("id"), email)
         contacts_parsed.append(
             (
                 contact.get("id"),
