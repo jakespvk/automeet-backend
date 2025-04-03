@@ -8,7 +8,8 @@ from pydantic import BaseModel, EmailStr
 from db_providers.active_campaign_adapter import get_contacts
 # from db_providers.sqlite_adapter import get_data
 
-from query_gpt import chat_with_gpt
+# from query_openai_gpt import chat_with_gpt
+from query_gemini import chat_with_gemini
 from send_result_email import send_email
 
 
@@ -58,10 +59,34 @@ class User(BaseModel):
         )
 
 
-def get_subscription_users():
+def get_daily_subscription_users():
     db = sqlite3.connect("user.db")
     cursor = db.cursor()
-    cursor.execute("SELECT * FROM users WHERE subscription = 1")
+    cursor.execute(
+        "SELECT * FROM users WHERE subscription = 1 AND poll_frequency = 'Daily'"
+    )
+    users = cursor.fetchall()
+    db.close()
+    return users
+
+
+def get_weekly_subscription_users():
+    db = sqlite3.connect("user.db")
+    cursor = db.cursor()
+    cursor.execute(
+        "SELECT * FROM users WHERE subscription = 1 AND poll_frequency = 'Weekly'"
+    )
+    users = cursor.fetchall()
+    db.close()
+    return users
+
+
+def get_monthly_subscription_users():
+    db = sqlite3.connect("user.db")
+    cursor = db.cursor()
+    cursor.execute(
+        "SELECT * FROM users WHERE subscription = 1 AND poll_frequency = 'Monthly'"
+    )
     users = cursor.fetchall()
     db.close()
     return users
@@ -99,34 +124,39 @@ def get_user(user_email):
     )
 
 
-def process_function(column_limit, row_limit):
+def process_function(user_list):
     # TODO: validation for column and row limits and poll_frequency
-    subscription_users = get_subscription_users()
-    for user in subscription_users:
-        ## get users data
-        # should maybe create another user constructor so this is possible
-        #    User(user)
-        # instead of running all the logic in get_user again
-        # TODO: Dedupe
-        user = get_user(user[0])
-        ## query activecampaign
-        # TODO: fix get only active columns
-        contacts = get_contacts(user.email)
-        ## compose the prompt
-        # TODO: fix this...... update: fixed??
-        prompt = ""
-        for i in range(min(row_limit, len(contacts))):
-            if len(contacts[i]) < column_limit:
-                current_contact = ""
-                for j in range(min(column_limit, len(contacts[i]))):
-                    current_contact = current_contact + str(contacts[i][j])
-                prompt = prompt + current_contact + "\n"
-            else:
-                prompt = prompt + str(contacts[i]) + "\n"
-        ## send the prompt to gpt
-        gpt_output = chat_with_gpt(prompt)
-        ## send email result
-        send_email(user.email, gpt_output)
+    for user in user_list:
+        try:
+            ## get users data
+            # should maybe create another user constructor so this is possible
+            #    User(user)
+            # instead of running all the logic in get_user again
+            # TODO: Dedupe
+            user = get_user(user[0])
+            ## query activecampaign
+            # TODO: fix get only active columns
+            contacts = get_contacts(user.email)
+            ## compose the prompt
+            # TODO: fix this...... update: fixed??
+            prompt = ""
+            for i in range(min(user.row_limit, len(contacts))):
+                if len(contacts[i]) < user.column_limit:
+                    current_contact = ""
+                    for j in range(min(user.column_limit, len(contacts[i]))):
+                        current_contact = current_contact + str(contacts[i][j])
+                    prompt = prompt + current_contact + "\n"
+                else:
+                    prompt = prompt + str(contacts[i]) + "\n"
+            ## send the prompt to gpt
+            gpt_output = chat_with_gemini(prompt)
+            ## send email result
+            send_email(user.email, gpt_output)
+        except:  # noqa: E722
+            send_email(
+                "jakespvk@gmail.com",
+                "Your API connection is setup improperly or has an issue",
+            )
 
     # client = get_activecampaign_connection(email)
     # input_user_data = get_activecampaign_data(client, columns, column_limit, row_limit)
@@ -142,26 +172,16 @@ def process_function(column_limit, row_limit):
     # send_email(email, gpt_output)
 
 
-def run_process_function():
-    # for email in emails in db where they have a subscription
-    # columns = get_fields("jakespvk@gmail.com")
-    # columns = [
-    #     "ID",
-    #     "First Name",
-    #     "Last Name",
-    #     "*Mgmt Notes",
-    #     "*Investment Thesis",
-    #     "*Industries",
-    #     "*Interests (Abstract & Ideas)",
-    #     "*Background",
-    #     "*What do you hope to gain?",
-    #     "*Current Focus",
-    #     "*Application Answer",
-    #     "*Expertise",
-    # ]
-    column_limit = 11
-    row_limit = 200
-    process_function(column_limit, row_limit)
+def run_daily_process_function():
+    process_function(get_daily_subscription_users())
+
+
+def run_weekly_process_function():
+    process_function(get_weekly_subscription_users())
+
+
+def run_monthly_process_function():
+    process_function(get_monthly_subscription_users())
 
 
 # run_main_process()
@@ -172,15 +192,17 @@ def test_function():
     print("success sent email")
 
 
-def run_scheduler():
-    schedule.every().monday.at("06:15").do(run_process_function)
-    # schedule.every(1).minutes.do(run_process_function)
+def run_schedulers():
+    schedule.every().day.at("06:15").do(run_daily_process_function)
+    schedule.every().monday.at("06:15").do(run_weekly_process_function)
+    schedule.every(30).days.at("06:15").do(run_monthly_process_function)
+    # schedule.every(5).seconds.do(run_weekly_process_function)
     while True:
         schedule.run_pending()
 
 
 def __main__():
-    scheduler_thread = threading.Thread(target=run_scheduler, daemon=True)
+    scheduler_thread = threading.Thread(target=run_schedulers, daemon=True)
     scheduler_thread.start()
 
 

@@ -1,9 +1,9 @@
 import sqlite3
-import threading
 
 from main_process import __main__
+from db_helper_functions import *
 
-from typing import List  # Annotated
+from typing import List, Optional  # Annotated
 
 from db_providers.active_campaign_adapter import get_fields
 # from db_providers.sqlite_adapter import get_data
@@ -42,8 +42,9 @@ class EmailRequest(BaseModel):
 class SetupSubscription(BaseModel):
     email: EmailStr
     db_type: str
-    api_url: str
-    api_key: str
+    api_url: Optional[str] = ""
+    api_key: Optional[str] = ""
+    attio_token: Optional[str] = ""
 
 
 class User(BaseModel):
@@ -57,6 +58,7 @@ class User(BaseModel):
     login_token: str
     api_url: str
     api_key: str
+    attio_token: str
     poll_frequency: str
 
     def __init__(
@@ -71,6 +73,7 @@ class User(BaseModel):
         login_token: str = "",
         api_url: str = "",
         api_key: str = "",
+        attio_token: str = "",
         poll_frequency: str = "",
     ) -> None:
         super().__init__(
@@ -84,6 +87,7 @@ class User(BaseModel):
             login_token=login_token,
             api_url=api_url,
             api_key=api_key,
+            attio_token=attio_token,
             poll_frequency=poll_frequency,
         )
 
@@ -92,12 +96,19 @@ class UpdateUser(BaseModel):
     user: User
 
 
-def setup_subscription_helper(email, db_type, api_url, api_key):
+def setup_subscription_helper(email, db_type, api_url="", api_key="", attio_token=""):
     db = sqlite3.connect("user.db")
     cursor = db.cursor()
-    cursor.execute(
-        f"UPDATE users SET db_type = '{db_type}', api_url = '{api_url}', api_key = '{api_key}' WHERE email = '{email}'"
-    )
+    if len(api_key) > 0:
+        cursor.execute(
+            f"UPDATE users SET db_type = '{db_type}', api_url = '{api_url}', api_key = '{api_key}' WHERE email = '{email}'"
+        )
+    elif len(attio_token) > 0:
+        cursor.execute(
+            f"UPDATE users SET db_type = '{db_type}', attio_token = '{attio_token}' WHERE email = '{email}'"
+        )
+    else:
+        return
     db.commit()
     db.close()
     user = get_user(email)
@@ -189,6 +200,7 @@ def new_user(user: User) -> User:
             user.login_token,
             user.api_url,
             user.api_key,
+            user.attio_token,
             user.poll_frequency,
         ),
     )
@@ -308,10 +320,39 @@ async def set_user_db_details(data: UpdateUser):
     return {"message": "User details updated!", "user": get_user(data.user.email)}
 
 
-@app.post("/setup-subscription")
-async def setup_subscription(data: SetupSubscription):
-    setup_subscription_helper(data.email, data.db_type, data.api_url, data.api_key)
+@app.post("/setup-subscription/ActiveCampaign")
+async def setup_subscription_activecampaign(data: SetupSubscription):
+    print("here in setup ac")
+    try:
+        setup_subscription_helper(
+            email=data.email,
+            db_type="ActiveCampaign",
+            api_url=data.api_url,
+            api_key=data.api_key,
+        )
+    except:  # noqa: E722
+        return {"message": "Error setting up subscription"}
     return {"message": "Subscription setup successful!"}
+
+
+@app.post("/setup-subscription/Attio")
+async def setup_subscription_attio(data: SetupSubscription):
+    try:
+        setup_subscription_helper(
+            email=data.email, db_type="Attio", attio_token=data.attio_token
+        )
+    except:  # noqa: E722
+        return {"message": "Error setting up subscription"}
+    return {"message": "Subscription setup successful!"}
+
+
+@app.delete("/provider/{email}")
+async def remove_provider(email: EmailStr):
+    try:
+        db_remove_provider(email)  # noqa: F405
+    except:  # noqa: E722
+        return {"message": "Error updating db"}
+    return {"message": "DB provider removed"}
 
 
 @app.get("/automeetbackend")

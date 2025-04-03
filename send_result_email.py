@@ -1,4 +1,5 @@
 from dotenv import load_dotenv
+from email.message import EmailMessage
 import smtplib
 import os
 
@@ -9,16 +10,13 @@ gmail_password = os.getenv("gmail_password")
 
 
 def send_email(recipient_email, gpt_output):
-    smtpserver = smtplib.SMTP_SSL("smtp.gmail.com", 465)
-    smtpserver.ehlo()
-    smtpserver.login(gmail_user, gmail_password)
+    msg = EmailMessage()
+    msg["From"] = "Automeet"
+    msg["To"] = recipient_email
+    msg["Subject"] = "Automated output from Automeet"
+    msg.set_content(gpt_output)
 
-    sent_from = "Automeet"
-    sent_to = recipient_email
-    email_text = (
-        "Hello, this is an automated email from Automeet. Here is the data:"
-        + gpt_output
-    )
-    smtpserver.sendmail(sent_from, sent_to, email_text)
-
-    smtpserver.close()
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as s:
+        s.ehlo()
+        s.login(gmail_user, gmail_password)
+        s.send_message(msg)
