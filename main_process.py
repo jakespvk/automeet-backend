@@ -5,7 +5,8 @@ import threading
 from typing import List  # Annotated
 from pydantic import BaseModel, EmailStr
 
-from db_providers.active_campaign_adapter import get_contacts
+import db_providers.active_campaign_adapter
+import db_providers.attio_adapter
 # from db_providers.sqlite_adapter import get_data
 
 # from query_openai_gpt import chat_with_gpt
@@ -135,26 +136,30 @@ def process_function(user_list):
             # TODO: Dedupe
             user = get_user(user[0])
             ## query activecampaign
+            prompt = ""
             # TODO: fix get only active columns
-            contacts = get_contacts(user.email)
+            if user.db_type == "ActiveCampaign":
+                contacts = db_providers.active_campaign_adapter.get_contacts(user.email)
+                for i in range(min(user.row_limit, len(contacts))):
+                    if len(contacts[i]) < user.column_limit:
+                        current_contact = ""
+                        for j in range(min(user.column_limit, len(contacts[i]))):
+                            current_contact = current_contact + str(contacts[i][j])
+                        prompt = prompt + current_contact + "\n"
+                    else:
+                        prompt = prompt + str(contacts[i]) + "\n"
+            elif user.db_type == "Attio":
+                contacts = db_providers.attio_adapter.get_contacts(user.email)
+                prompt = contacts
             ## compose the prompt
             # TODO: fix this...... update: fixed??
-            prompt = ""
-            for i in range(min(user.row_limit, len(contacts))):
-                if len(contacts[i]) < user.column_limit:
-                    current_contact = ""
-                    for j in range(min(user.column_limit, len(contacts[i]))):
-                        current_contact = current_contact + str(contacts[i][j])
-                    prompt = prompt + current_contact + "\n"
-                else:
-                    prompt = prompt + str(contacts[i]) + "\n"
             ## send the prompt to gpt
             gpt_output = chat_with_gemini(prompt)
             ## send email result
             send_email(user.email, gpt_output)
         except:  # noqa: E722
             send_email(
-                "jakespvk@gmail.com",
+                user.email,
                 "Your API connection is setup improperly or has an issue",
             )
 
