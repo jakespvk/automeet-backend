@@ -198,9 +198,9 @@ def test_function():
 
 
 def run_schedulers():
-    schedule.every().day.at("06:15").do(run_daily_process_function)
-    schedule.every().monday.at("06:15").do(run_weekly_process_function)
-    schedule.every(30).days.at("06:15").do(run_monthly_process_function)
+    schedule.every().day.at("14:15").do(run_daily_process_function)
+    schedule.every().monday.at("14:15").do(run_weekly_process_function)
+    schedule.every(30).days.at("14:15").do(run_monthly_process_function)
     # schedule.every(5).seconds.do(run_weekly_process_function)
     while True:
         schedule.run_pending()
