@@ -14,7 +14,7 @@ def send_email(recipient_email, gpt_output):
     msg["From"] = "Automeet"
     msg["To"] = recipient_email
     msg["Subject"] = "Automated output from Automeet"
-    msg.set_content(gpt_output)
+    msg.set_content(f"""{gpt_output}""")
 
     with smtplib.SMTP_SSL("smtp.gmail.com", 465) as s:
         s.ehlo()
