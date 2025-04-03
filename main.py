@@ -1,12 +1,12 @@
 import sqlite3
 
 from main_process import __main__
-from db_helper_functions import *
+from db_helper_functions import db_remove_provider
 
 from typing import List, Optional  # Annotated
 
-from db_providers.active_campaign_adapter import get_fields
-# from db_providers.sqlite_adapter import get_data
+import db_providers.active_campaign_adapter
+import db_providers.attio_adapter
 
 import subprocess
 
@@ -112,10 +112,13 @@ def setup_subscription_helper(email, db_type, api_url="", api_key="", attio_toke
     db.commit()
     db.close()
     user = get_user(email)
-    user.active_columns = ["id", "firstName", "lastName", "email"]
-    update_user_db_details(user)
-    user.columns = get_fields(email)
+    if user.db_type == "ActiveCampaign":
+        user.columns = db_providers.active_campaign_adapter.get_fields(email)
+    elif user.db_type == "Attio":
+        user.columns = db_providers.attio_adapter.get_fields(email)
     update_user_db_fields(user)
+    user.active_columns = user.columns[0:4]
+    update_user_db_details(user)
 
 
 def update_user_db_fields(user: User):
@@ -150,6 +153,12 @@ def update_user_db_details(user: User):
         query = f"UPDATE users \
             SET api_url = '{user.api_url}', \
             api_key = '{user.api_key}', \
+            active_columns = '{active_columns_str}', \
+            poll_frequency = '{user.poll_frequency}' \
+            WHERE email = '{user.email}'"
+    elif user.db_type == "Attio":
+        query = f"UPDATE users \
+            SET attio_token = '{user.attio_token}', \
             active_columns = '{active_columns_str}', \
             poll_frequency = '{user.poll_frequency}' \
             WHERE email = '{user.email}'"

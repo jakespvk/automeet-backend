@@ -22,3 +22,14 @@ def get_contacts(email):
     }
     response = requests.post(url, headers=headers)
     return response.text
+
+
+def get_fields(email):
+    attio_token = get_db_credentials(email)
+    url = "https://api.attio.com/v2/objects/identifier/attributes"
+    headers = {
+        "accept": "application/json",
+        "Authorization": "Bearer " + attio_token,
+    }
+    response = requests.get(url, headers=headers)
+    return response.text
