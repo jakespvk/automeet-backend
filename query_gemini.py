@@ -12,7 +12,10 @@ def chat_with_gemini(input_prompt):
         2 or more people with similar backgrounds or interests in fields \
         provided that you decipher as descriptive.
 
-        Please return the related/similar people in separate groups. 
+        Please return the related/similar people in separate groups. Please \
+        separate these groups with the characters '{}' (left curly brace, \
+        right curly brace), so I can split them up into individual objects \
+        and manipulate them as such in my code.
 
         Please return *aggressively*, that is, return even if you are unsure \
         I would rather have lower quality matches to review than less matches. \
