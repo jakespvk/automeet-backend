@@ -19,7 +19,8 @@ def manipulate_gpt_output_to_scaffold_email(gpt_output):
     for group in groups:
         html_blocks_for_output.append(
             f"""<p>{group}</p><br><button><a href="mailto:jakespvk@gmail.com">\
-                    Send Intro</a></button><br><br>"""
+                    Send Intro</a></button><p>*Note: this will not send an email\
+                    until you make changes and confirm</p><br><br>"""
         )
 
     final_html_email = """"""
