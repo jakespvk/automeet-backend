@@ -8,9 +8,9 @@ client = genai.Client(api_key=os.getenv("gemini_api_key"))
 
 
 def chat_with_gemini(input_prompt):
-    base_prompt = """Please take this data, and return names and IDs of any \
-        2 or more people with similar backgrounds or interests in fields \
-        provided that you decipher as descriptive.
+    base_prompt = """Please take this data, and return names, emails, and IDs \
+        of any 2 or more people with similar backgrounds or interests in \
+        fields provided that you decipher as descriptive.
 
         Please return the related/similar people in separate groups. Please \
         separate these groups with the characters '{}' (left curly brace, \
@@ -19,12 +19,24 @@ def chat_with_gemini(input_prompt):
 
         Please return *aggressively*, that is, return even if you are unsure \
         I would rather have lower quality matches to review than less matches. \
-        Overall--quantity over quality. \n"""
+        Overall--quantity over quality. 
+
+        Please also return emails a second time, separated as comma-separated \
+        lists, also separated by groups but with '[]' (left square bracket, \
+        right square bracket), at top of the output. For example:
+            email@email.com,email2@gmail.com,email3@gmail.com
+            []
+            email4@gmail.com,email5@gmail.com
+            {}
+            --rest of output--
+        \n\n"""
 
     input_prompt = base_prompt + input_prompt
 
     response = client.models.generate_content(
-        model="gemini-2.5-pro-exp-03-25", contents=input_prompt
+        model="gemini-2.0-flash",
+        contents=input_prompt,
+        # model="gemini-2.5-pro-exp-03-25", contents=input_prompt
     )
 
     print(response.text)

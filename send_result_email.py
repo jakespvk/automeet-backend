@@ -13,12 +13,16 @@ gmail_password = os.getenv("gmail_password")
 
 def manipulate_gpt_output_to_scaffold_email(gpt_output):
     groups = gpt_output.split("{}")
+    if len(groups) == 0:
+        return gpt_output
+
+    emails = groups[0].split("[]")
 
     html_blocks_for_output = []
 
-    for group in groups:
+    for group, idx in groups[1:]:
         html_blocks_for_output.append(
-            f"""<p>{group}</p><br><button><a href="mailto:jakespvk@gmail.com">\
+            f"""<p>{group}</p><br><button><a href="mailto:{emails[idx].strip()}">\
                     Send Intro</a></button><p>*Note: this will not send an email\
                     until you make changes and confirm</p><br><br>"""
         )
