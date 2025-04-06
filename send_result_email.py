@@ -31,6 +31,8 @@ def manipulate_gpt_output_to_scaffold_email(gpt_output):
     for html_block in html_blocks_for_output:
         final_html_email = f"""{final_html_email}{html_block}"""
 
+    return final_html_email
+
 
 def send_email(recipient_email, gpt_output):
     msg = MIMEMultipart("alternative")
