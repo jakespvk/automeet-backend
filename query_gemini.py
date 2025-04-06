@@ -39,9 +39,9 @@ def chat_with_gemini(input_prompt):
     input_prompt = base_prompt + input_prompt
 
     response = client.models.generate_content(
-        model="gemini-2.0-flash",
+        # model="gemini-2.0-flash",
+        model="gemini-2.5-pro-exp-03-25",
         contents=input_prompt,
-        # model="gemini-2.5-pro-exp-03-25", contents=input_prompt
     )
 
     print(response.text)
