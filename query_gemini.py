@@ -17,13 +17,16 @@ def chat_with_gemini(input_prompt):
         right curly brace), so I can split them up into individual objects \
         and manipulate them as such in my code.
 
+        Please also add a brief "potential email introduction text" at the \
+        end of each group, for easy copy-pasting.
+
         Please return *aggressively*, that is, return even if you are unsure \
         I would rather have lower quality matches to review than less matches. \
         Overall--quantity over quality. 
 
         Please also return emails a second time, separated as comma-separated \
         lists, also separated by groups but with '[]' (left square bracket, \
-        right square bracket), at top of the output. For example:
+        right square bracket), at beginning of the output. For example:
             email@email.com,email2@gmail.com,email3@gmail.com
             []
             email4@gmail.com,email5@gmail.com
