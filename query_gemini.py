@@ -28,10 +28,13 @@ def chat_with_gemini(input_prompt):
         Please also return the emails from the groups a second time, \
         separated as comma-separated lists, also separated by groups but \
         with '[]' (left square bracket, right square bracket), at beginning \
-        of the output. For example:
+        of the output (no need for a code block like ```, just use this \
+        format). For example:
             email@email.com,email2@gmail.com,email3@gmail.com
             []
             email4@gmail.com,email5@gmail.com
+            []
+            email6@gmail.com,email7@gmail.com,email8@gmail.com
             {}
             --rest of output--
         \n\n"""

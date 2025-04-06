@@ -31,6 +31,15 @@ def manipulate_gpt_output_to_scaffold_email(gpt_output):
     for html_block in html_blocks_for_output:
         final_html_email = f"""{final_html_email}{html_block}"""
 
+    final_html_email = f"""\
+        <html>
+            <head></head>
+            <body>
+                {final_html_email}
+            </body>
+        </html>
+    """
+
     print(final_html_email)
     return final_html_email
 
@@ -49,4 +58,4 @@ def send_email(recipient_email, gpt_output):
     with smtplib.SMTP_SSL("smtp.gmail.com", 465) as s:
         s.ehlo()
         s.login(gmail_user, gmail_password)
-        s.sendmail("autom33t@gmail.com", recipient_email, msg.as_string())
+        s.sendmail("Automeet", recipient_email, msg.as_string())
