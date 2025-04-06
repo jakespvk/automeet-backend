@@ -31,8 +31,6 @@ def manipulate_gpt_output_to_scaffold_email(gpt_output):
     for html_block in html_blocks_for_output:
         final_html_email = f"""{final_html_email}{html_block}"""
 
-    return final_html_email
-
 
 def send_email(recipient_email, gpt_output):
     msg = MIMEMultipart("alternative")
@@ -40,10 +38,10 @@ def send_email(recipient_email, gpt_output):
     msg["To"] = recipient_email
     msg["Subject"] = "Automated output from Automeet"
 
-    plain = MIMEText(gpt_output)
-    html = MIMEText(manipulate_gpt_output_to_scaffold_email(gpt_output))
-    msg.attach(plain, "plain")
-    msg.attach(html, "html")
+    msg.attach(MIMEText(f"""{gpt_output}""", "plain"))
+    msg.attach(
+        MIMEText(f"""{manipulate_gpt_output_to_scaffold_email(gpt_output)}""", "html")
+    )
 
     with smtplib.SMTP_SSL("smtp.gmail.com", 465) as s:
         s.ehlo()
