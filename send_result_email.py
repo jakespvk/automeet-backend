@@ -49,4 +49,4 @@ def send_email(recipient_email, gpt_output):
     with smtplib.SMTP_SSL("smtp.gmail.com", 465) as s:
         s.ehlo()
         s.login(gmail_user, gmail_password)
-        s.send_message(msg)
+        s.sendmail("autom33t@gmail.com", recipient_email, msg.as_string())
