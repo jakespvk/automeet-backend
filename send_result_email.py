@@ -22,7 +22,7 @@ def manipulate_gpt_output_to_scaffold_email(gpt_output):
 
     for idx, group in enumerate(groups[1:]):
         email_intro_text = group[
-            group.index("Potential email introduction text:") : group.index("\n")
+            group.index("Potential email introduction text:") : group.index("<")
         ].strip()
         print(email_intro_text)
         html_blocks_for_output.append(
