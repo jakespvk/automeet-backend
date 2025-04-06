@@ -207,6 +207,8 @@ def run_schedulers():
 
 
 def __main__():
+    # gpt_output = chat_with_gemini("hi")
+    # send_email("autom33t@gmail.com", gpt_output)
     scheduler_thread = threading.Thread(target=run_schedulers, daemon=True)
     scheduler_thread.start()
 

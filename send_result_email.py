@@ -20,9 +20,14 @@ def manipulate_gpt_output_to_scaffold_email(gpt_output):
 
     html_blocks_for_output = []
 
-    for group, idx in groups[1:]:
+    for idx, group in enumerate(groups[1:]):
+        email_intro_text = group[
+            group.index("Potential email introduction text:") : group.index("\n")
+        ].strip()
+        print(email_intro_text)
         html_blocks_for_output.append(
-            f"""<p>{group}</p><br><button><a href="mailto:{emails[idx].strip()}">\
+            f"""{group}<br><button><a href="mailto:?to={emails[idx].strip()}\
+                    &subject=Introduction&body={email_intro_text}">\
                     Send Intro</a></button><p>*Note: this will not send an email\
                     until you make changes and confirm</p><br><br>"""
         )
