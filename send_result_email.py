@@ -44,6 +44,11 @@ def manipulate_gpt_output_to_scaffold_email(gpt_output):
                 <meta name="supported-color-schemes" content="light dark">
             </head>
             <style>
+                a {
+                    text-decoration: none;
+                    padding: 15px;
+                    border-radius: 5px;
+                }
                 @media (prefers-color-scheme: dark) {
                     a {
                         background-color: white;
