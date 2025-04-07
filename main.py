@@ -197,7 +197,7 @@ def new_user(user: User) -> User:
     db = sqlite3.connect("user.db")
     cursor = db.cursor()
     cursor.execute(
-        "INSERT INTO users (email, subscription, db_type, columns, active_columns, column_limit, row_limit, login_token, api_url, api_key, poll_frequency) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO users (email, subscription, db_type, columns, active_columns, column_limit, row_limit, login_token, api_url, api_key, poll_frequency, attio_token) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         (
             user.email,
             user.subscription,
