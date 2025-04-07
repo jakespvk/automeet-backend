@@ -26,12 +26,11 @@ def manipulate_gpt_output_to_scaffold_email(gpt_output):
         # ].strip()
         # print(email_intro_text)
         html_blocks_for_output.append(
-            f"""{group}<br><button style="background:white;color:black;\
-                    border:none;border-radius:3px;">\
-                    <a style="text-decoration:none;color:black;padding:5px;"\
+            f"""{group}<br><a style="text-decoration:none;color:black;padding:10px;\
+                    background-color:white;border-radius:5px;"\
                     href="mailto:?to={emails[idx].strip()}\
                     &subject=Introduction&body=Hey [names]">\
-                    Send Intro</a></button><p>*Note: this will not send an email\
+                    Send Intro</a><p>*Note: this will not send an email\
                     until you make changes and confirm</p><br><br>"""
         )
 
@@ -42,7 +41,7 @@ def manipulate_gpt_output_to_scaffold_email(gpt_output):
     final_html_email = f"""\
         <html>
             <head></head>
-            <body style="background-color:black;color:white;padding:20px;">
+            <body style="background-color:black;color:white;padding:20px;max-width:1000px;">
                 <h1 style="font-size:2rem;">Automeet</h1>
                 {final_html_email}
             </body>
