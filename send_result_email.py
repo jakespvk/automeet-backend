@@ -48,6 +48,8 @@ def manipulate_gpt_output_to_scaffold_email(gpt_output):
                     text-decoration: none;
                     padding: 15px;
                     border-radius: 5px;
+                    background-color: white;
+                    color: black;
                 }
                 @media (prefers-color-scheme: dark) {
                     a {
