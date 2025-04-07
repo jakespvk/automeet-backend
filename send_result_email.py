@@ -27,7 +27,7 @@ def manipulate_gpt_output_to_scaffold_email(gpt_output):
         # print(email_intro_text)
         html_blocks_for_output.append(
             f"""{group}<br><a style="text-decoration:none;\
-                background-color:white;color:white;padding:15px;\
+                background-color:#F0FFFF;color:white;padding:15px;\
                 border-radius:5px;" href="mailto:?to={emails[idx].strip()}\
                 &subject=Introduction&body=Hey [names]">\
                 Send Intro</a><p>*Note: this will not send an email\
