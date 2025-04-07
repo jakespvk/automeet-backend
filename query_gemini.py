@@ -27,7 +27,7 @@ def chat_with_gemini(input_prompt):
 
         Please return *aggressively*, that is, return even if you are unsure \
         I would rather have lower quality matches to review than less matches. \
-        Overall--quantity over quality. 
+        Overall--quantity over quality.
 
         Please also return the emails from the groups a second time, \
         separated as comma-separated lists, also separated by groups but \
