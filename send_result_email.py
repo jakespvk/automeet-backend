@@ -26,10 +26,12 @@ def manipulate_gpt_output_to_scaffold_email(gpt_output):
         # ].strip()
         # print(email_intro_text)
         html_blocks_for_output.append(
-            f"""{group}<br><a href="mailto:?to={emails[idx].strip()}\
-                    &subject=Introduction&body=Hey [names]">\
-                    Send Intro</a><p>*Note: this will not send an email\
-                    until you make changes and confirm</p><br><br>"""
+            f"""{group}<br><a style="text-decoration:none;\
+                background-color:white;color:white;padding:15px;\
+                border-radius:5px;" href="mailto:?to={emails[idx].strip()}\
+                &subject=Introduction&body=Hey [names]">\
+                Send Intro</a><p>*Note: this will not send an email\
+                until you make changes and confirm</p><br><br>"""
         )
 
     final_html_email = """"""
@@ -44,12 +46,14 @@ def manipulate_gpt_output_to_scaffold_email(gpt_output):
                 <meta name="supported-color-schemes" content="light dark">
             </head>
             <style>
+                body {
+                    margin-left: auto;
+                    margin-right: auto;
+                }
                 a {
                     text-decoration: none;
                     padding: 15px;
                     border-radius: 5px;
-                    background-color: white;
-                    color: black;
                 }
                 @media (prefers-color-scheme: dark) {
                     a {
