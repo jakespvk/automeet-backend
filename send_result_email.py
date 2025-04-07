@@ -42,6 +42,7 @@ def manipulate_gpt_output_to_scaffold_email(gpt_output):
         <html>
             <head></head>
             <body style="background-color:black;color:white;">
+                <h1 style="font-size:2rem;">Automeet</h1>
                 {final_html_email}
             </body>
         </html>
