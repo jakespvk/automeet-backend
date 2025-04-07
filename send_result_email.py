@@ -26,9 +26,7 @@ def manipulate_gpt_output_to_scaffold_email(gpt_output):
         # ].strip()
         # print(email_intro_text)
         html_blocks_for_output.append(
-            f"""{group}<br><a style="text-decoration:none;color:black;padding:10px;\
-                    background-color:white;border-radius:5px;"\
-                    href="mailto:?to={emails[idx].strip()}\
+            f"""{group}<br><a href="mailto:?to={emails[idx].strip()}\
                     &subject=Introduction&body=Hey [names]">\
                     Send Intro</a><p>*Note: this will not send an email\
                     until you make changes and confirm</p><br><br>"""
@@ -38,15 +36,36 @@ def manipulate_gpt_output_to_scaffold_email(gpt_output):
     for html_block in html_blocks_for_output:
         final_html_email = f"""{final_html_email}{html_block}"""
 
-    final_html_email = f"""\
+    final_html_email = (
+        """\
         <html>
-            <head></head>
-            <body style="background-color:black;color:white;padding:20px;max-width:1000px;">
+            <head>
+                <meta name="color-scheme" content="light dark">
+                <meta name="supported-color-schemes" content="light dark">
+            </head>
+            <style>
+                @media (prefers-color-scheme: dark) {
+                    a {
+                        background-color: white;
+                        color: black;
+                    }
+                }
+                @media (prefers-color-scheme: light) {
+                    a {
+                        background-color: black;
+                        color: white;
+                    }
+                }
+            </style>
+            <body> 
                 <h1 style="font-size:2rem;">Automeet</h1>
-                {final_html_email}
+                """
+        + final_html_email
+        + """
             </body>
         </html>
     """
+    )
 
     print(final_html_email)
     return final_html_email
