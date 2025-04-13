@@ -167,6 +167,7 @@ def update_user_db_details(user: User):
     cursor.execute(query)
     db.commit()
     db.close()
+    print("success")
 
 
 def create_magic_link_token(email: str) -> str:
@@ -197,7 +198,7 @@ def new_user(user: User) -> User:
     db = sqlite3.connect("user.db")
     cursor = db.cursor()
     cursor.execute(
-        "INSERT INTO users (email, subscription, db_type, columns, active_columns, column_limit, row_limit, login_token, api_url, api_key, poll_frequency, attio_token) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO users (email, subscription, db_type, columns, active_columns, column_limit, row_limit, login_token, api_url, api_key, attio_token, poll_frequency) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         (
             user.email,
             user.subscription,
@@ -238,17 +239,18 @@ def get_user(user_email) -> User:
     else:
         list_active_columns = user[9].split(",")
     return User(
-        user[0],
-        user[1] or False,
-        user[2] or "",
-        list_columns or [],
-        list_active_columns or [],
-        user[4] or 0,
-        user[5] or 0,
-        user[6] or "",
-        user[7] or "",
-        user[8] or "",
-        user[10] or "",
+        email=user[0],
+        subscription=user[1] or False,
+        db_type=user[2] or "",
+        columns=list_columns or [],
+        active_columns=list_active_columns or [],
+        column_limit=user[4] or 0,
+        row_limit=user[5] or 0,
+        login_token=user[6] or "",
+        api_url=user[7] or "",
+        api_key=user[8] or "",
+        attio_token=user[11] or "",
+        poll_frequency=user[10] or "Monthly",
     )
 
 
