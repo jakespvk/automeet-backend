@@ -1,4 +1,4 @@
-def handle_login(user_email):
+def handle_login(user_email, user_login_link):
     import smtplib
     from email.mime.multipart import MIMEMultipart
     from email.mime.text import MIMEText

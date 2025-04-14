@@ -21,6 +21,7 @@ from datetime import datetime, timedelta
 
 import smtplib
 from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 import os
 from dotenv import load_dotenv  # , dotenv_values
 
@@ -183,15 +184,35 @@ def send_magic_link(email: str, token: str):
     else:
         base_url = "http://localhost:3000"
     magic_link = f"{base_url}/magic?token={token}"
-    msg = MIMEText(f"Click this link to log in: {magic_link}")
-    msg["Subject"] = "Your magic link login"
+
+    msg = MIMEMultipart("alternative")
     msg["From"] = "Automeet"
     msg["To"] = email
+    msg["Subject"] = "Your Login Link"
+
+    msg.attach(MIMEText(f"Click this link to log in: {magic_link}"))
+    msg.attach(
+        MIMEText(
+            f"""\
+                    <html> 
+                     <head></head>
+                     <body style="font-family:Verdana,Arial,sans-serif;">
+                     <div style="width:fit-content;height:svh;text-align:center;padding-bottom:20px;">
+                        <h1 style="font-size:3rem;">Automeet</h1>
+                        <a href="{magic_link}" style="background-color:#000;padding:10px;\
+                        text-decoration:none;color:#FFF;border-radius:5px;">Click here to login</a>
+                    </div>
+                     </body>
+                 </html>\
+                 """,
+            "html",
+        )
+    )
 
     with smtplib.SMTP_SSL("smtp.gmail.com", 465) as s:
         s.ehlo()
         s.login(gmail_user, gmail_password)
-        s.send_message(msg)
+        s.sendmail("Automeet", email, msg.as_string())
 
 
 def new_user(user: User) -> User:
