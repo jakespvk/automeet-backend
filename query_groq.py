@@ -47,122 +47,122 @@ def chat_with_groq(input_prompt):
 
     input_prompt = base_prompt + input_prompt
 
-    input_prompt = (
-        base_prompt
-        + """
-    micahhuang@gmail.com,lauramichelle@gmail.com,tigerheart@gmail.com
-    []
-    lauramichelle@gmail.com,entertainment@gmail.com,tigerheart@gmail.com
-    []
-    micahhuang@gmail.com,tigerheart@gmail.com
-    []
-    elvish_treaty@icloud.com,mitchell@gmail.com,adayinasilverdik@gmail.com
-    []
-    elvish_treaty@icloud.com,mitchell@gmail.com,adayinasilverdik@gmail.com,13154955@163.com,micahhuang@gmail.com,lauramichelle@gmail.com,cory@gmail.com,entertainment@gmail.com,tigerheart@gmail.com
-    []
-    tigerheart@gmail.com,cory@gmail.com
-    {}
-    Name: Micah Huang
-    Email: micahhuang@gmail.com
-    ID: 6125
-
-    Name: Laura Ramirez
-    Email: lauramichelle@gmail.com
-    ID: 5152
-
-    Name: TigerHeart
-    Email: tigerheart@gmail.com
-    ID: 6517
-
-    Potential email introduction text: Hi all, I'm connecting you as you each expressed an interest in community building and fostering meaningful connections in your backgrounds. Perhaps you might find common ground or opportunities to collaborate.
-    {}
-    Name: Laura Ramirez
-    Email: lauramichelle@gmail.com
-    ID: 5152
-
-    Name: Sheila TRUE
-    Email: entertainment@gmail.com
-    ID: 6440
-
-    Name: TigerHeart
-    Email: tigerheart@gmail.com
-    ID: 6517
-
-    Potential email introduction text: Hi all, connecting you as you share experience as founders, owner/operators, or entrepreneurs leading your own ventures. Thought you might benefit from sharing insights.
-    {}
-    Name: Micah Huang
-    Email: micahhuang@gmail.com
-    ID: 6125
-
-    Name: TigerHeart
-    Email: tigerheart@gmail.com
-    ID: 6517
-
-    Potential email introduction text: Hi both, I noticed you both have backgrounds involving creative fields like performance arts, music, film, or media. Thought you might find a connection valuable.
-    {}
-    Name: Langston Tolbert
-    Email: elvish_treaty@icloud.com
-    ID: 13286
-
-    Name: Mitchell Meislin
-    Email: mitchell@gmail.com
-    ID: 3369
-
-    Name: Reha
-    Email: adayinasilverdik@gmail.com
-    ID: 3678
-
-    Potential email introduction text: Hi all, connecting you as you seem to work in professional services fields (legal, consulting, agency). Perhaps there's overlap or shared experiences worth discussing.
-    {}
-    Name: Langston Tolbert
-    Email: elvish_treaty@icloud.com
-    ID: 13286
-
-    Name: Mitchell Meislin
-    Email: mitchell@gmail.com
-    ID: 3369
-
-    Name: Reha
-    Email: adayinasilverdik@gmail.com
-    ID: 3678
-
-    Name: Tess Zhang
-    Email: 13154955@163.com
-    ID: 14491
-
-    Name: Micah Huang
-    Email: micahhuang@gmail.com
-    ID: 6125
-
-    Name: Laura Ramirez
-    Email: lauramichelle@gmail.com
-    ID: 5152
-
-    Name: Cory Watkins-Suzuki
-    Email: cory@gmail.com
-    ID: 3568
-
-    Name: Sheila TRUE
-    Email: entertainment@gmail.com
-    ID: 6440
-
-    Name: TigerHeart
-    Email: tigerheart@gmail.com
-    ID: 6517
-
-    Potential email introduction text: Hi all, I'm connecting this group as you all provided professional links (like LinkedIn or company websites) in your info, suggesting a focus on professional networking or online presence. Perhaps you can share insights or connect further.
-    {}
-    Name: TigerHeart
-    Email: tigerheart@gmail.com
-    ID: 6517
-
-    Name: Cory Watkins-Suzuki
-    Email: cory@gmail.com
-    ID: 3568
-
-    Potential email introduction text: Hi both, I noticed a potential shared interest in themes of healing, wellness, or human connection based on your provided info (TigerHeart's mention of healing, Cory's 'SharingHuman'). Thought a connection might be interesting.
-    """
-    )
+    # input_prompt = (
+    #     base_prompt
+    #     + """
+    # micahhuang@gmail.com,lauramichelle@gmail.com,tigerheart@gmail.com
+    # []
+    # lauramichelle@gmail.com,entertainment@gmail.com,tigerheart@gmail.com
+    # []
+    # micahhuang@gmail.com,tigerheart@gmail.com
+    # []
+    # elvish_treaty@icloud.com,mitchell@gmail.com,adayinasilverdik@gmail.com
+    # []
+    # elvish_treaty@icloud.com,mitchell@gmail.com,adayinasilverdik@gmail.com,13154955@163.com,micahhuang@gmail.com,lauramichelle@gmail.com,cory@gmail.com,entertainment@gmail.com,tigerheart@gmail.com
+    # []
+    # tigerheart@gmail.com,cory@gmail.com
+    # {}
+    # Name: Micah Huang
+    # Email: micahhuang@gmail.com
+    # ID: 6125
+    #
+    # Name: Laura Ramirez
+    # Email: lauramichelle@gmail.com
+    # ID: 5152
+    #
+    # Name: TigerHeart
+    # Email: tigerheart@gmail.com
+    # ID: 6517
+    #
+    # Potential email introduction text: Hi all, I'm connecting you as you each expressed an interest in community building and fostering meaningful connections in your backgrounds. Perhaps you might find common ground or opportunities to collaborate.
+    # {}
+    # Name: Laura Ramirez
+    # Email: lauramichelle@gmail.com
+    # ID: 5152
+    #
+    # Name: Sheila TRUE
+    # Email: entertainment@gmail.com
+    # ID: 6440
+    #
+    # Name: TigerHeart
+    # Email: tigerheart@gmail.com
+    # ID: 6517
+    #
+    # Potential email introduction text: Hi all, connecting you as you share experience as founders, owner/operators, or entrepreneurs leading your own ventures. Thought you might benefit from sharing insights.
+    # {}
+    # Name: Micah Huang
+    # Email: micahhuang@gmail.com
+    # ID: 6125
+    #
+    # Name: TigerHeart
+    # Email: tigerheart@gmail.com
+    # ID: 6517
+    #
+    # Potential email introduction text: Hi both, I noticed you both have backgrounds involving creative fields like performance arts, music, film, or media. Thought you might find a connection valuable.
+    # {}
+    # Name: Langston Tolbert
+    # Email: elvish_treaty@icloud.com
+    # ID: 13286
+    #
+    # Name: Mitchell Meislin
+    # Email: mitchell@gmail.com
+    # ID: 3369
+    #
+    # Name: Reha
+    # Email: adayinasilverdik@gmail.com
+    # ID: 3678
+    #
+    # Potential email introduction text: Hi all, connecting you as you seem to work in professional services fields (legal, consulting, agency). Perhaps there's overlap or shared experiences worth discussing.
+    # {}
+    # Name: Langston Tolbert
+    # Email: elvish_treaty@icloud.com
+    # ID: 13286
+    #
+    # Name: Mitchell Meislin
+    # Email: mitchell@gmail.com
+    # ID: 3369
+    #
+    # Name: Reha
+    # Email: adayinasilverdik@gmail.com
+    # ID: 3678
+    #
+    # Name: Tess Zhang
+    # Email: 13154955@163.com
+    # ID: 14491
+    #
+    # Name: Micah Huang
+    # Email: micahhuang@gmail.com
+    # ID: 6125
+    #
+    # Name: Laura Ramirez
+    # Email: lauramichelle@gmail.com
+    # ID: 5152
+    #
+    # Name: Cory Watkins-Suzuki
+    # Email: cory@gmail.com
+    # ID: 3568
+    #
+    # Name: Sheila TRUE
+    # Email: entertainment@gmail.com
+    # ID: 6440
+    #
+    # Name: TigerHeart
+    # Email: tigerheart@gmail.com
+    # ID: 6517
+    #
+    # Potential email introduction text: Hi all, I'm connecting this group as you all provided professional links (like LinkedIn or company websites) in your info, suggesting a focus on professional networking or online presence. Perhaps you can share insights or connect further.
+    # {}
+    # Name: TigerHeart
+    # Email: tigerheart@gmail.com
+    # ID: 6517
+    #
+    # Name: Cory Watkins-Suzuki
+    # Email: cory@gmail.com
+    # ID: 3568
+    #
+    # Potential email introduction text: Hi both, I noticed a potential shared interest in themes of healing, wellness, or human connection based on your provided info (TigerHeart's mention of healing, Cory's 'SharingHuman'). Thought a connection might be interesting.
+    # """
+    # )
 
     response = client.chat.completions.create(
         messages=[
