@@ -199,7 +199,7 @@ def test_function():
 
 
 def run_schedulers():
-    selected_time = "6:15"
+    selected_time = "06:15"
     selected_timezone = timezone("America/Los_Angeles")
     schedule.every().day.at(selected_time, selected_timezone).do(
         run_daily_process_function
