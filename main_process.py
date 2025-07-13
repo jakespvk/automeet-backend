@@ -11,7 +11,9 @@ import db_providers.attio_adapter
 # from db_providers.sqlite_adapter import get_data
 
 # from query_openai_gpt import chat_with_gpt
-from query_gemini import chat_with_gemini
+# from query_gemini import chat_with_gemini
+from query_groq import chat_with_groq
+
 from send_result_email import send_email
 
 
@@ -155,7 +157,7 @@ def process_function(user_list):
             ## compose the prompt
             # TODO: fix this...... update: fixed??
             ## send the prompt to gpt
-            gpt_output = chat_with_gemini(prompt)
+            gpt_output = chat_with_groq(prompt)
             ## send email result
             send_email(user.email, gpt_output)
         except:  # noqa: E722
