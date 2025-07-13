@@ -1,5 +1,6 @@
 import sqlite3
 import schedule
+from pytz import timezone
 import threading
 
 from typing import List  # Annotated
@@ -198,10 +199,18 @@ def test_function():
 
 
 def run_schedulers():
-    schedule.every().day.at("14:15").do(run_daily_process_function)
-    schedule.every().monday.at("14:15").do(run_weekly_process_function)
-    schedule.every(30).days.at("14:15").do(run_monthly_process_function)
-    # schedule.every(5).seconds.do(run_weekly_process_function)
+    selected_time = "6:15"
+    selected_timezone = timezone("America/Los_Angeles")
+    schedule.every().day.at(selected_time, selected_timezone).do(
+        run_daily_process_function
+    )
+    schedule.every().monday.at(selected_time, selected_timezone).do(
+        run_weekly_process_function
+    )
+    schedule.every(30).days.at(selected_time, selected_timezone).do(
+        run_monthly_process_function
+    )
+    # schedule.every(5).seconds.do(run_daily_process_function)
     while True:
         schedule.run_pending()
 
