@@ -1,4 +1,5 @@
 import sqlite3
+import stripe
 
 from main_process import __main__
 from db_helper_functions import db_remove_provider
@@ -19,6 +20,8 @@ from pydantic import BaseModel, EmailStr
 
 from datetime import datetime, timedelta
 
+import Models
+
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -31,9 +34,11 @@ load_dotenv()
 gmail_user = os.getenv("gmail_user")
 gmail_password = os.getenv("gmail_password")
 
+stripe.api_key = os.getenv("stripe_api_key")
+
 SECRET_KEY = secrets.token_urlsafe(32)
 ALGORITHM = "HS256"
-TOKEN_EXPIRE_MINUTES = 60
+TOKEN_EXPIRE_MINUTES = 43800
 
 
 class EmailRequest(BaseModel):
@@ -314,6 +319,7 @@ app.add_middleware(
 
 @app.post("/auth/signin/")
 async def sign_in(data: EmailRequest):
+    data.email = data.email.lower()
     token = create_magic_link_token(data.email)
     set_user_token(get_user(data.email), token)
     send_magic_link(data.email, token)
@@ -322,12 +328,7 @@ async def sign_in(data: EmailRequest):
 
 @app.post("/auth/signup/")
 async def sign_up(data: EmailRequest):
-    token = create_magic_link_token(data.email)
-    user = User(data.email)
-    new_user(user)
-    set_user_token(user, token)
-    send_magic_link(user.email, token)
-    return {"message": "Magic link sent to your email!"}
+    return sign_in(data)
 
 
 @app.get("/verify")
@@ -390,3 +391,29 @@ async def remove_provider(email: EmailStr):
 @app.get("/automeetbackend")
 async def home():
     return {"message": "Hello from Automeet Backend"}
+
+
+@app.post("/create-checkout-session")
+async def checkout(subscription: Models.Subscription):
+    try:
+        session = stripe.checkout.Session.create(
+            line_items=[
+                {
+                    "price_data": {
+                        "currency": "usd",
+                        "product_data": {
+                            "name": f"{subscription.poll_frequency} subscription to Automeet Services"
+                        },
+                        "unit_amount": (subscription.price * 100),
+                    },
+                    "quantity": 1,
+                },
+            ],
+            mode="subscription",
+            ui_mode="embedded",
+            # The URL of your payment completion page
+            return_url="http://localhost:3000/pricing",
+        )
+        return {"clientSecret": session["client_secret"]}
+    except Exception as e:
+        raise HTTPException(status_code=403, detail=str(e))
